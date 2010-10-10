@@ -22,11 +22,15 @@ public class FeedersTableModel implements TableModel {
     private List<TableModelListener> modelListeners = new LinkedList<TableModelListener>();
     private Lock listenersLock = new ReentrantLock();
 
+    private FeedersComboBoxModel comboBoxModel;
+    private DevicesTableModel tableModel;
     private DbService dbService;
     private List<Feeder> feeders;
 
-    public FeedersTableModel(DbService dbService) {
-        this.dbService = dbService;
+    public FeedersTableModel(FeedersComboBoxModel comboBoxModel, DevicesTableModel tableModel) {
+        this.comboBoxModel = comboBoxModel;
+        this.tableModel = tableModel;
+        dbService = comboBoxModel.getDbService();
         this.feeders = new LinkedList<Feeder>(dbService.getFeeders());
     }
 
@@ -107,6 +111,8 @@ public class FeedersTableModel implements TableModel {
                             dbService.setFeederName(feeder.getId(), name);
                         }
                         feeder.setName(name);
+                        comboBoxModel.refresh();
+                        tableModel.refresh();
                     }
                     break;
             }
@@ -162,6 +168,8 @@ public class FeedersTableModel implements TableModel {
                         TableModelEvent.ALL_COLUMNS,
                         TableModelEvent.DELETE
                 ));
+                comboBoxModel.refresh();
+                tableModel.refresh();
                 return true;
             }
         }

@@ -12,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,9 +50,10 @@ public class AskueReport {
 
         DatesListModel datesListModel = new DatesListModel(dbService);
         DevicesTableModel devicesModel = new DevicesTableModel(dbService);
+        FeedersComboBoxModel comboBoxModel = new FeedersComboBoxModel(dbService);
 
         frame.setJMenuBar(createMenuBar(askueService, datesListModel, devicesModel));
-        frame.getContentPane().add(buildMainPanel(datesListModel, devicesModel));
+        frame.getContentPane().add(buildMainPanel(datesListModel, devicesModel, comboBoxModel));
         frame.pack();
 
         locateOnOpticalScreenCenter(frame);
@@ -206,7 +208,10 @@ public class AskueReport {
 
     }
 
-    private static JPanel buildFeedersPanel(DbService dbService) {
+    private static JPanel buildFeedersPanel(
+            FeedersComboBoxModel comboBoxModel,
+            DevicesTableModel devicesTableModel
+    ) {
         FormLayout layout = new FormLayout(
                 "fill:110dlu:grow, p, p",
                 "p, 1dlu, fill:100dlu:grow"
@@ -216,9 +221,11 @@ public class AskueReport {
         builder.setDefaultDialogBorder();
         CellConstraints cc = new CellConstraints();
 
-        FeedersTableModel tableModel = new FeedersTableModel(dbService);
+        FeedersTableModel tableModel = new FeedersTableModel(comboBoxModel, devicesTableModel);
         JTable table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableColumn codeColumn = table.getColumnModel().getColumn(0);
+        codeColumn.setMaxWidth(160);
 
         JButton addButton = createButton("/icons/add.png", "Добавить фидер");
         addButton.addActionListener(new AddFeederActionListener(table));
@@ -277,15 +284,19 @@ public class AskueReport {
         }
     }
 
-    private static JComponent buildMainPanel(DatesListModel listModel, DevicesTableModel devicesModel) {
+    private static JComponent buildMainPanel(
+            DatesListModel listModel,
+            DevicesTableModel devicesModel,
+            FeedersComboBoxModel comboBoxModel
+    ) {
         return new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT,
                 true,
                 buildDatePanel(listModel),
                 new JSplitPane(
                         JSplitPane.VERTICAL_SPLIT,
-                        true, buildFeedersPanel(listModel.getDbService()),
-                        buildDevicesPanel(devicesModel)
+                        true, buildFeedersPanel(comboBoxModel, devicesModel),
+                        buildDevicesPanel(devicesModel, comboBoxModel)
                 ));
     }
 
@@ -314,7 +325,7 @@ public class AskueReport {
         return button;
     }
 
-    private static JPanel buildDevicesPanel(DevicesTableModel tableModel) {
+    private static JPanel buildDevicesPanel(DevicesTableModel tableModel, FeedersComboBoxModel comboBoxModel) {
         FormLayout layout = new FormLayout(
                 "fill:110dlu:grow",
                 "p, 1dlu, fill:100dlu:grow"
@@ -326,6 +337,12 @@ public class AskueReport {
 
         JTable table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableColumn codeColumn = table.getColumnModel().getColumn(0);
+        codeColumn.setMaxWidth(160);
+        TableColumn feederColumn = table.getColumnModel().getColumn(1);
+        feederColumn.setCellEditor(new ComboBoxEditor(comboBoxModel));
+        TableColumn reactiveColumn = table.getColumnModel().getColumn(2);
+        reactiveColumn.setMaxWidth(160);
 
         builder.addTitle("Счетчики:", cc.xy(1, 1));
         builder.add(new JScrollPane(table), cc.xy(1, 3));

@@ -18,9 +18,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DevicesTableModel implements TableModel {
 
-    public static final String TYPE_ACTIVE = "Активная";
-    public static final String TYPE_REACTIVE = "Реактивная";
-
     private List<TableModelListener> modelListeners = new LinkedList<TableModelListener>();
     private Lock listenersLock = new ReentrantLock();
 
@@ -73,7 +70,7 @@ public class DevicesTableModel implements TableModel {
             case 1:
                 return String.class;
             case 2:
-                return String.class;
+                return Boolean.class;
             default:
                 return null;
         }
@@ -93,7 +90,7 @@ public class DevicesTableModel implements TableModel {
                     String feederName = feedersIdMap.get(device.getFeeder());
                     return feederName != null ? feederName : "";
                 case 2:
-                    return device.isReactive() ? TYPE_REACTIVE : TYPE_ACTIVE;
+                    return device.isReactive();
                 default:
                     return null;
             }
@@ -123,12 +120,10 @@ public class DevicesTableModel implements TableModel {
                     }
                     break;
                 case 2:
-                    stringValue = (String) value;
-                    boolean active = TYPE_ACTIVE.equals(stringValue);
-                    boolean reactive = TYPE_REACTIVE.equals(stringValue);
-                    if ((active || reactive) && device.isReactive() != reactive) {
+                    Boolean reactive = (Boolean) value;
+                    if (reactive != device.isReactive()) {
+                        device.setReactive(reactive);
                         dbService.setDeviceReactive(device.getId(), reactive);
-                    } else {
                         fireEvent(new TableModelEvent(this, rowIndex, rowIndex, columnIndex, TableModelEvent.UPDATE));
                     }
                     break;
