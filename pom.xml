@@ -82,6 +82,14 @@
             <version>2.0.1</version>
         </dependency>
 
+        <!-- Excel related -->
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.7-beta3</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>
