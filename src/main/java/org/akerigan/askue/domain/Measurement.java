@@ -12,7 +12,7 @@ public class Measurement {
     private int device;
     private Date readDate;
     private int period;
-    private float readout;
+    private double readout;
 
     public int getId() {
         return id;
@@ -46,11 +46,11 @@ public class Measurement {
         this.period = period;
     }
 
-    public float getReadout() {
+    public double getReadout() {
         return readout;
     }
 
-    public void setReadout(float readout) {
+    public void setReadout(double readout) {
         this.readout = readout;
     }
 }

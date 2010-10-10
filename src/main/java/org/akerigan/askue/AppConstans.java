@@ -1,5 +1,9 @@
 package org.akerigan.askue;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -11,10 +15,17 @@ public class AppConstans {
     public static final String PLATFORM_LOOK_AND_FEEL =
             "com.jgoodies.looks.plastic.PlasticXPLookAndFeel";
 
-    public static final Pattern PATTERN_DBF_FILE_NAME = Pattern.compile("[Dd]{2}\\d{6}\\.[Dd][Bb][Ff]");
+    public static final Pattern PATTERN_DBF_FILE_NAME =
+            Pattern.compile("[Dd]{2}\\d{6}\\.[Dd][Bb][Ff]");
 
     public static final String ENCODING_DBF_DEFAULT =
             "CP866";
+
+    public static final DateFormat DATE_FORMAT_DATES_LIST =
+            new SimpleDateFormat("dd.MM.yyyy");
+
+    public static final DateFormat DATE_FORMAT_SHORT =
+            new SimpleDateFormat("dd.MM");
 
     public static final String MESSAGE_TITLE =
             "Отчеты АСКУЭ :: Менеджер данных";
@@ -43,8 +54,14 @@ public class AppConstans {
     public static final String MESSAGE_INFORMATION =
             "Информация";
 
-    public static final String MESSAGE_IMPORTED_SUCCESSFULLY =
+    public static final String MESSAGE_ERROR =
+            "Ошибка";
+
+    public static final String MESSAGE_EXPORTED_SUCCESSFULLY =
             "Данные успешно экспортированы";
+
+    public static final String MESSAGE_EXPORT_ERROR =
+            "Ошибка импорта в excel: ";
 
     public static final String MESSAGE_FEEDER_ADD =
             "Добавить фидер";
@@ -104,4 +121,42 @@ public class AppConstans {
     public static final String COLUMN_DEVICE_REACTIVE =
             "Реактивный";
 
+    public static final String SHEET_ACTIVE =
+            "Активные присоединения";
+
+    public static final String SHEET_REACTIVE =
+            "Реактивные присоединения";
+
+    public static final String SHEET_COLUMN_PERIOD =
+            "Дата, время";
+
+    public static final String SUFFIX_ACTIVE =
+            " АП, кВт*ч";
+
+    public static final String SUFFIX_REACTIVE =
+            " РП, кВАр*ч";
+
+    // characters * 256
+    public static final int WIDTH_COLUMN_PERIOD = 16 * 256;
+
+    // characters count
+    public static final int WIDTH_COLUMN_DEFAULT = 15;
+
+    // points * 20
+    public static final short HEIGHT_ROW_DEFAULT = 30 * 20;
+
+    public static final Map<Integer, String> PERIOD_STRING;
+
+    static {
+        PERIOD_STRING = new HashMap<Integer, String>();
+        for (int period = 0; period < 48; ++period) {
+            PERIOD_STRING.put(period, ", " + getPeriodAsString(period) + ":" + getPeriodAsString(period + 1));
+        }
+    }
+
+    private static String getPeriodAsString(int period) {
+        int hours = period / 2;
+        int minutes = period % 2 * 30;
+        return String.format("%02d-%02d", hours, minutes);
+    }
 }

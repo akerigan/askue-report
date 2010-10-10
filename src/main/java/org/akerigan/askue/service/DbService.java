@@ -1,11 +1,9 @@
 package org.akerigan.askue.service;
 
-import org.akerigan.askue.db.DateMapper;
-import org.akerigan.askue.db.DeviceMapper;
-import org.akerigan.askue.db.FeederMapper;
-import org.akerigan.askue.db.StringMapper;
+import org.akerigan.askue.db.*;
 import org.akerigan.askue.domain.Device;
 import org.akerigan.askue.domain.Feeder;
+import org.akerigan.askue.domain.Measurement;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 import java.util.*;
@@ -124,6 +122,11 @@ public class DbService {
 
     public List<Date> getMeasumentsDates() {
         return template.query("select distinct read_date from measurement order by read_date", DateMapper.getInstance());
+    }
+
+    public List<Measurement> getMeasuments(Date date) {
+        return template.query("select id, device, read_date, period, readout from measurement " +
+                "where read_date=? order by period, device", MeasurementMapper.getInstance(), date);
     }
 
 }

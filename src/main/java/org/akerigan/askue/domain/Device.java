@@ -33,4 +33,16 @@ public class Device {
     public void setReactive(boolean reactive) {
         this.reactive = reactive;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Device device = (Device) o;
+        return this == o || !(o == null || getClass() != o.getClass())
+                && id == device.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

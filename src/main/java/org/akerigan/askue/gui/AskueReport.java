@@ -17,6 +17,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.akerigan.askue.AppConstans.*;
 
@@ -36,7 +40,7 @@ public class AskueReport {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("/appContext.xml");
 
         DbService dbService = (DbService) ctx.getBean("dbService");
-        AscueReportService askueService = (AscueReportService) ctx.getBean("askueService");
+        AscueReportService reportService = (AscueReportService) ctx.getBean("askueService");
 
         try {
             UIManager.setLookAndFeel(PLATFORM_LOOK_AND_FEEL);
@@ -54,8 +58,10 @@ public class AskueReport {
         DevicesTableModel devicesModel = new DevicesTableModel(dbService);
         FeedersComboBoxModel comboBoxModel = new FeedersComboBoxModel(dbService);
 
-        frame.setJMenuBar(createMenuBar(askueService, datesListModel, devicesModel));
-        frame.getContentPane().add(buildMainPanel(datesListModel, devicesModel, comboBoxModel));
+        frame.setJMenuBar(createMenuBar(reportService, datesListModel, devicesModel));
+        frame.getContentPane().add(buildMainPanel(
+                datesListModel, devicesModel, comboBoxModel, reportService
+        ));
         frame.pack();
 
         locateOnOpticalScreenCenter(frame);
@@ -108,16 +114,17 @@ public class AskueReport {
             this.devicesModel = devicesModel;
         }
 
+        @SuppressWarnings({"ConstantConditions"})
         public void actionPerformed(ActionEvent actionEvent) {
-            JFileChooser fc = new JFileChooser();
-            fc.setMultiSelectionEnabled(true);
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setMultiSelectionEnabled(true);
             FileNameExtensionFilter filter = new FileNameExtensionFilter(
                     "Database files (*.dbf)", "dbf");
-            fc.setFileFilter(filter);
-            int returnVal = fc.showOpenDialog(null);
+            fileChooser.setFileFilter(filter);
+            int returnVal = fileChooser.showOpenDialog(null);
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                for (File file : fc.getSelectedFiles()) {
+                for (File file : fileChooser.getSelectedFiles()) {
                     log.info("Importing: " + file.toString());
                     try {
                         service.importDbf(file);
@@ -167,7 +174,7 @@ public class AskueReport {
         }
     }
 
-    private static JPanel buildDatePanel(DatesListModel listModel) {
+    private static JPanel buildDatePanel(DatesListModel listModel, AscueReportService reportService) {
         FormLayout layout = new FormLayout(
                 "fill:110dlu:grow, p",
                 "p, 1dlu, fill:100dlu:grow"
@@ -179,7 +186,7 @@ public class AskueReport {
 
         JList list = new JList(listModel);
         JButton exportButton = createButton("/icons/export.png", MESSAGE_EXPORT_TO_EXCEL);
-        exportButton.addActionListener(new ExportActionListener(list));
+        exportButton.addActionListener(new ExportActionListener(list, reportService));
 
         builder.addTitle(MESSAGE_IMPORTED_DATES, cc.xy(1, 1));
         builder.add(exportButton, cc.xy(2, 1));
@@ -191,12 +198,14 @@ public class AskueReport {
     private static class ExportActionListener implements ActionListener {
 
         private JList list;
+        private AscueReportService reportService;
 
-        public ExportActionListener(JList list) {
+        public ExportActionListener(JList list, AscueReportService reportService) {
             this.list = list;
+            this.reportService = reportService;
         }
 
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent actionEvent) {
             Object[] selectedValues = list.getSelectedValues();
             if (selectedValues.length == 0) {
                 JOptionPane.showMessageDialog(
@@ -204,13 +213,33 @@ public class AskueReport {
                         MESSAGE_INFORMATION, JOptionPane.INFORMATION_MESSAGE
                 );
             } else {
-                for (Object selectedValue : selectedValues) {
-                    System.out.println("selectedValue = " + selectedValue);
+                JFileChooser fileChooser = new JFileChooser();
+                FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                        "Excel files (*.xls)", "xls");
+                fileChooser.setFileFilter(filter);
+                int returnVal = fileChooser.showSaveDialog(null);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    List<Date> selectedDates = new LinkedList<Date>();
+                    for (Object selectedValue : selectedValues) {
+                        try {
+                            selectedDates.add(DATE_FORMAT_DATES_LIST.parse((String) selectedValue));
+                        } catch (ParseException ignored) {
+                        }
+                    }
+                    try {
+                        reportService.exportToExcel(fileChooser.getSelectedFile(), selectedDates);
+                        JOptionPane.showMessageDialog(
+                                null, MESSAGE_EXPORTED_SUCCESSFULLY,
+                                MESSAGE_INFORMATION, JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } catch (Exception e) {
+                        log.error("Unable import to excel file", e);
+                        JOptionPane.showMessageDialog(
+                                null, MESSAGE_EXPORT_ERROR + e.getMessage(),
+                                MESSAGE_ERROR, JOptionPane.ERROR_MESSAGE
+                        );
+                    }
                 }
-                JOptionPane.showMessageDialog(
-                        null, MESSAGE_IMPORTED_SUCCESSFULLY,
-                        MESSAGE_INFORMATION, JOptionPane.INFORMATION_MESSAGE
-                );
             }
         }
 
@@ -298,12 +327,13 @@ public class AskueReport {
     private static JComponent buildMainPanel(
             DatesListModel listModel,
             DevicesTableModel devicesModel,
-            FeedersComboBoxModel comboBoxModel
+            FeedersComboBoxModel comboBoxModel,
+            AscueReportService reportService
     ) {
         return new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT,
                 true,
-                buildDatePanel(listModel),
+                buildDatePanel(listModel, reportService),
                 new JSplitPane(
                         JSplitPane.VERTICAL_SPLIT,
                         true, buildFeedersPanel(comboBoxModel, devicesModel),
