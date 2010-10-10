@@ -6,8 +6,6 @@ import org.akerigan.askue.db.FeederMapper;
 import org.akerigan.askue.db.StringMapper;
 import org.akerigan.askue.domain.Device;
 import org.akerigan.askue.domain.Feeder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 import java.util.*;
@@ -19,7 +17,6 @@ import java.util.*;
 public class DbService {
 
     protected SimpleJdbcTemplate template;
-    private Log log = LogFactory.getLog(getClass());
 
     public void setTemplate(SimpleJdbcTemplate template) {
         this.template = template;
@@ -76,10 +73,6 @@ public class DbService {
     public int addFeeder(String name) {
         template.update("insert into feeder (name) values (?)", name);
         return template.queryForInt("select id from feeder where name=?", name);
-    }
-
-    public Feeder getFeeder(String name) {
-        return template.queryForObject("select id, name from feeder where name=?", FeederMapper.getInstance(), name);
     }
 
     public void setFeederName(int id, String name) {

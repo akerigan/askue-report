@@ -18,6 +18,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import static org.akerigan.askue.AppConstans.*;
+
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 01.10.2010 22:16:58 (Europe/Moscow)
@@ -37,13 +39,13 @@ public class AskueReport {
         AscueReportService askueService = (AscueReportService) ctx.getBean("askueService");
 
         try {
-            UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
+            UIManager.setLookAndFeel(PLATFORM_LOOK_AND_FEEL);
         } catch (Exception e) {
             // Likely PlasticXP is not in the class path; ignore.
         }
 
         JFrame frame = new JFrame();
-        frame.setTitle("Отчеты АСКУЭ :: Менеджер данных");
+        frame.setTitle(MESSAGE_TITLE);
         frame.setSize(600, 350);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setIconImage(createImage("/icons/finance.png"));
@@ -67,11 +69,11 @@ public class AskueReport {
     ) {
         JMenuBar result = new JMenuBar();
 
-        JMenu fileMenu = new JMenu("Файл");
+        JMenu fileMenu = new JMenu(MESSAGE_MENU_FILE);
         result.add(fileMenu);
 
         JMenuItem importMenuItem = new JMenuItem(
-                "Импорт dbf", createImageIcon("/icons/import.png")
+                MESSAGE_MENU_IMPORT_DBF, createImageIcon("/icons/import.png")
         );
         fileMenu.add(importMenuItem);
         importMenuItem.addActionListener(new ImportActionListener(service, datesListModel, devicesModel));
@@ -79,7 +81,7 @@ public class AskueReport {
         fileMenu.addSeparator();
 
         JMenuItem closeMenuItem = new JMenuItem(
-                "Закрыть", createImageIcon("/icons/close.png")
+                MESSAGE_MENU_CLOSE, createImageIcon("/icons/close.png")
         );
         fileMenu.add(closeMenuItem);
         closeMenuItem.addActionListener(new ActionListener() {
@@ -122,7 +124,7 @@ public class AskueReport {
                     } catch (Exception e) {
                         log.error("Error importing file: " + file.toString(), e);
                         JOptionPane.showMessageDialog(
-                                null, e.getMessage(), "Ошибка импорта файла", JOptionPane.ERROR_MESSAGE);
+                                null, e.getMessage(), MESSAGE_IMPORT_ERROR, JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 datesListModel.refresh();
@@ -176,10 +178,10 @@ public class AskueReport {
         CellConstraints cc = new CellConstraints();
 
         JList list = new JList(listModel);
-        JButton exportButton = createButton("/icons/export.png", "Экспорт в Excel");
+        JButton exportButton = createButton("/icons/export.png", MESSAGE_EXPORT_TO_EXCEL);
         exportButton.addActionListener(new ExportActionListener(list));
 
-        builder.addTitle("Импортированные даты:", cc.xy(1, 1));
+        builder.addTitle(MESSAGE_IMPORTED_DATES, cc.xy(1, 1));
         builder.add(exportButton, cc.xy(2, 1));
         builder.add(new JScrollPane(list), cc.xyw(1, 3, 2));
 
@@ -197,12 +199,18 @@ public class AskueReport {
         public void actionPerformed(ActionEvent e) {
             Object[] selectedValues = list.getSelectedValues();
             if (selectedValues.length == 0) {
-                JOptionPane.showMessageDialog(null, "Не выбрано ни одной даты", "Информация", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        null, MESSAGE_NO_DATES_SELECTED,
+                        MESSAGE_INFORMATION, JOptionPane.INFORMATION_MESSAGE
+                );
             } else {
                 for (Object selectedValue : selectedValues) {
                     System.out.println("selectedValue = " + selectedValue);
                 }
-                JOptionPane.showMessageDialog(null, "Данные успешно экспортированы", "Информация", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        null, MESSAGE_IMPORTED_SUCCESSFULLY,
+                        MESSAGE_INFORMATION, JOptionPane.INFORMATION_MESSAGE
+                );
             }
         }
 
@@ -227,13 +235,13 @@ public class AskueReport {
         TableColumn codeColumn = table.getColumnModel().getColumn(0);
         codeColumn.setMaxWidth(160);
 
-        JButton addButton = createButton("/icons/add.png", "Добавить фидер");
+        JButton addButton = createButton("/icons/add.png", MESSAGE_FEEDER_ADD);
         addButton.addActionListener(new AddFeederActionListener(table));
 
-        JButton removeButton = createButton("/icons/remove.png", "Удалить фидер");
+        JButton removeButton = createButton("/icons/remove.png", MESSAGE_FEEDER_REMOVE);
         removeButton.addActionListener(new RemoveFeederActionListener(table));
 
-        builder.addTitle("Фидеры:", cc.xy(1, 1));
+        builder.addTitle(MESSAGE_FEEDERS, cc.xy(1, 1));
         builder.add(addButton, cc.xy(2, 1));
         builder.add(removeButton, cc.xy(3, 1));
         builder.add(new JScrollPane(table), cc.xyw(1, 3, 3));
@@ -269,14 +277,17 @@ public class AskueReport {
         public void actionPerformed(ActionEvent e) {
             FeedersTableModel tableModel = (FeedersTableModel) table.getModel();
             int selectedRow = table.getSelectedRow();
-            int decision = JOptionPane.showConfirmDialog(null, "Удалить фидер?", "Подтверждение", JOptionPane.YES_NO_OPTION);
+            int decision = JOptionPane.showConfirmDialog(
+                    null, MESSAGE_FEEDER_REMOVE_CONFIRM, MESSAGE_CONFIRM,
+                    JOptionPane.YES_NO_OPTION
+            );
             if (decision == JOptionPane.YES_OPTION) {
                 if (tableModel.removeFeeder(selectedRow)) {
                     setSelection(table, selectedRow, 1);
                 } else {
                     JOptionPane.showMessageDialog(
-                            null, "Невозможно удалить фидер: есть ассоциированные с ним счетчики",
-                            "Удаление фидера", JOptionPane.INFORMATION_MESSAGE
+                            null, MESSAGE_FEEDER_REMOVAL_RESTRICTED,
+                            MESSAGE_FEEDER_REMOVING, JOptionPane.INFORMATION_MESSAGE
                     );
                 }
             }
@@ -344,7 +355,7 @@ public class AskueReport {
         TableColumn reactiveColumn = table.getColumnModel().getColumn(2);
         reactiveColumn.setMaxWidth(160);
 
-        builder.addTitle("Счетчики:", cc.xy(1, 1));
+        builder.addTitle(MESSAGE_DEVICES, cc.xy(1, 1));
         builder.add(new JScrollPane(table), cc.xy(1, 3));
 
         return builder.getPanel();

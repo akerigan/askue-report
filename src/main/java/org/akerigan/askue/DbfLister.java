@@ -14,9 +14,9 @@ import java.io.FileNotFoundException;
 public class DbfLister {
 
     public static void main(String[] args) throws FileNotFoundException, DBFException {
-        FileInputStream in = new FileInputStream("/home/akerigan/tmp/ASKUE/dd100924.dbf");
+        FileInputStream in = new FileInputStream("/tmp/ASKUE/dd100924.dbf");
         DBFReader dbfReader = new DBFReader(in);
-        dbfReader.setCharactersetName("CP866");
+        dbfReader.setCharactersetName(AppConstans.ENCODING_DBF_DEFAULT);
         int fieldsCount = dbfReader.getFieldCount();
         for (int i = 0; i < fieldsCount; ++i) {
             DBFField dbfField = dbfReader.getField(i);

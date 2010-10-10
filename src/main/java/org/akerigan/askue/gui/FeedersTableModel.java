@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.akerigan.askue.AppConstans.*;
+
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 02.10.2010 22:20:09 (Europe/Moscow)
@@ -45,9 +47,9 @@ public class FeedersTableModel implements TableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "Код фидера";
+                return COLUMN_FEEDER_CODE;
             case 1:
-                return "Фидер";
+                return COLUMN_FEEDER_NAME;
             default:
                 return "";
         }
@@ -96,7 +98,8 @@ public class FeedersTableModel implements TableModel {
                         if (feedersNames.contains(name)) {
                             int idx = 1;
                             do {
-                                name = value + " Копия(" + idx + ")";
+                                name = value + DUBLICATE_FEEDER_NAME_PART_1
+                                        + idx + DUBLICATE_FEEDER_NAME_PART_2;
                                 idx += 1;
                             } while (feedersNames.contains(name));
                         }

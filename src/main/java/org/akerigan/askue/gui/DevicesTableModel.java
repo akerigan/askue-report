@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.akerigan.askue.AppConstans.*;
+
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 02.10.2010 22:20:09 (Europe/Moscow)
@@ -53,11 +55,11 @@ public class DevicesTableModel implements TableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return "Код счетчика";
+                return COLUMN_DEVICE_CODE;
             case 1:
-                return "Фидер";
+                return COLUMN_DEVICE_FEEDER;
             case 2:
-                return "Реактивный";
+                return COLUMN_DEVICE_REACTIVE;
             default:
                 return "";
         }
