@@ -4,6 +4,7 @@ import org.akerigan.askue.db.*;
 import org.akerigan.askue.domain.Device;
 import org.akerigan.askue.domain.Feeder;
 import org.akerigan.askue.domain.Measurement;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 import java.util.*;
@@ -27,8 +28,12 @@ public class DbService {
             template.update("create table feeder(id identity primary key, name varchar(256))");
         }
         if (!tables.contains("DEVICE")) {
-            template.update("create table device(id int, feeder int, reactive bool)"
-            );
+            template.update("create table device(id int, feeder int, reactive bool)");
+        } else {
+            try {
+                template.update("alter table device add enabled bool");
+            } catch (DataAccessException ignored) {
+            }
         }
         if (!tables.contains("MEASUREMENT")) {
             template.update("create table measurement(id identity primary key, device int, " +
@@ -87,7 +92,7 @@ public class DbService {
     }
 
     public List<Device> getDevices() {
-        return template.query("select id, feeder, reactive from device order by id", DeviceMapper.getInstance());
+        return template.query("select id, feeder, reactive, enabled from device order by id", DeviceMapper.getInstance());
     }
 
     public Map<Integer, Device> getDevicesMap() {
@@ -108,6 +113,10 @@ public class DbService {
 
     public void setDeviceReactive(int id, boolean reactive) {
         template.update("update device set reactive=? where id=?", reactive, id);
+    }
+
+    public void setDeviceEnabled(int id, boolean enabled) {
+        template.update("update device set enabled=? where id=?", enabled, id);
     }
 
     public void addMeasurement(int deviceId, Date date, int period, float readout) {

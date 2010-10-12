@@ -150,21 +150,23 @@ public class AscueReportService {
         Map<Device, Integer> reactiveColumnsMap = new HashMap<Device, Integer>();
 
         for (Device device : devicesIdsMap.values()) {
-            String feederName = feedersIdMap.get(device.getFeeder());
-            if (device.isReactive()) {
-                reactiveCell = reactiveRow.createCell(reactiveColumnIdx);
-                reactiveCell.setCellType(HSSFCell.CELL_TYPE_STRING);
-                reactiveCell.setCellValue(feederName + SUFFIX_REACTIVE);
-                reactiveCell.setCellStyle(centeredStyle);
-                reactiveColumnsMap.put(device, reactiveColumnIdx);
-                reactiveColumnIdx += 1;
-            } else {
-                activeCell = activeRow.createCell(activeColumnIdx);
-                activeCell.setCellType(HSSFCell.CELL_TYPE_STRING);
-                activeCell.setCellValue(feederName + SUFFIX_ACTIVE);
-                activeCell.setCellStyle(centeredStyle);
-                activeColumnsMap.put(device, activeColumnIdx);
-                activeColumnIdx += 1;
+            if (device.isEnabled()) {
+                String feederName = feedersIdMap.get(device.getFeeder());
+                if (device.isReactive()) {
+                    reactiveCell = reactiveRow.createCell(reactiveColumnIdx);
+                    reactiveCell.setCellType(HSSFCell.CELL_TYPE_STRING);
+                    reactiveCell.setCellValue(feederName + SUFFIX_REACTIVE);
+                    reactiveCell.setCellStyle(centeredStyle);
+                    reactiveColumnsMap.put(device, reactiveColumnIdx);
+                    reactiveColumnIdx += 1;
+                } else {
+                    activeCell = activeRow.createCell(activeColumnIdx);
+                    activeCell.setCellType(HSSFCell.CELL_TYPE_STRING);
+                    activeCell.setCellValue(feederName + SUFFIX_ACTIVE);
+                    activeCell.setCellStyle(centeredStyle);
+                    activeColumnsMap.put(device, activeColumnIdx);
+                    activeColumnIdx += 1;
+                }
             }
         }
 
@@ -203,15 +205,17 @@ public class AscueReportService {
                 }
                 for (Measurement measurement : measurements) {
                     Device device = devicesIdsMap.get(measurement.getDevice());
-                    int period = measurement.getPeriod();
-                    if (device.isReactive()) {
-                        reactiveRow = reactiveSheet.getRow(reactiveRowIdx + period - 1);
-                        reactiveCell = reactiveRow.getCell(reactiveColumnsMap.get(device));
-                        reactiveCell.setCellValue(measurement.getReadout());
-                    } else {
-                        activeRow = activeSheet.getRow(activeRowIdx + period - 1);
-                        activeCell = activeRow.getCell(activeColumnsMap.get(device));
-                        activeCell.setCellValue(measurement.getReadout());
+                    if (device.isEnabled()) {
+                        int period = measurement.getPeriod();
+                        if (device.isReactive()) {
+                            reactiveRow = reactiveSheet.getRow(reactiveRowIdx + period - 1);
+                            reactiveCell = reactiveRow.getCell(reactiveColumnsMap.get(device));
+                            reactiveCell.setCellValue(measurement.getReadout());
+                        } else {
+                            activeRow = activeSheet.getRow(activeRowIdx + period - 1);
+                            activeCell = activeRow.getCell(activeColumnsMap.get(device));
+                            activeCell.setCellValue(measurement.getReadout());
+                        }
                     }
                 }
                 activeRowIdx += 48;

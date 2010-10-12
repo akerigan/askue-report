@@ -9,6 +9,7 @@ public class Device {
     private int id;
     private int feeder;
     private boolean reactive;
+    private boolean enabled;
 
     public int getId() {
         return id;
@@ -32,6 +33,14 @@ public class Device {
 
     public void setReactive(boolean reactive) {
         this.reactive = reactive;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     @Override

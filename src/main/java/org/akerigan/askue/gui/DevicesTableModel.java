@@ -49,7 +49,7 @@ public class DevicesTableModel implements TableModel {
     }
 
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     public String getColumnName(int columnIndex) {
@@ -60,6 +60,8 @@ public class DevicesTableModel implements TableModel {
                 return COLUMN_DEVICE_FEEDER;
             case 2:
                 return COLUMN_DEVICE_REACTIVE;
+            case 3:
+                return COLUMN_DEVICE_ENABLED;
             default:
                 return "";
         }
@@ -72,6 +74,8 @@ public class DevicesTableModel implements TableModel {
             case 1:
                 return String.class;
             case 2:
+                return Boolean.class;
+            case 3:
                 return Boolean.class;
             default:
                 return null;
@@ -93,6 +97,8 @@ public class DevicesTableModel implements TableModel {
                     return feederName != null ? feederName : "";
                 case 2:
                     return device.isReactive();
+                case 3:
+                    return device.isEnabled();
                 default:
                     return null;
             }
@@ -126,6 +132,14 @@ public class DevicesTableModel implements TableModel {
                     if (reactive != device.isReactive()) {
                         device.setReactive(reactive);
                         dbService.setDeviceReactive(device.getId(), reactive);
+                        fireEvent(new TableModelEvent(this, rowIndex, rowIndex, columnIndex, TableModelEvent.UPDATE));
+                    }
+                    break;
+                case 3:
+                    Boolean enabled = (Boolean) value;
+                    if (enabled != device.isEnabled()) {
+                        device.setEnabled(enabled);
+                        dbService.setDeviceEnabled(device.getId(), enabled);
                         fireEvent(new TableModelEvent(this, rowIndex, rowIndex, columnIndex, TableModelEvent.UPDATE));
                     }
                     break;

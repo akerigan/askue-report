@@ -121,6 +121,9 @@ public class AppConstans {
     public static final String COLUMN_DEVICE_REACTIVE =
             "Реактивный";
 
+    public static final String COLUMN_DEVICE_ENABLED =
+            "Включен";
+
     public static final String SHEET_ACTIVE =
             "Активные присоединения";
 

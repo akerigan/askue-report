@@ -27,6 +27,7 @@ public class DeviceMapper implements RowMapper<Device> {
         result.setId(resultSet.getInt(1));
         result.setFeeder(resultSet.getInt(2));
         result.setReactive(resultSet.getBoolean(3));
+        result.setEnabled(resultSet.getBoolean(4));
         return result;
     }
 }
